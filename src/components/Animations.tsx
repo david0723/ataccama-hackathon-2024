@@ -84,9 +84,9 @@ export const Animations = () => {
         Array.isArray(data) &&
         data
 
-          .sort(() => Math.random() - 0.5)
+          // .sort(() => Math.random() - 0.5)
           .map((animation: any) => (
-            <Grid key={animation.id} xs={12}>
+            <Grid xs={12} key={animation.pathname}>
               <AnimationBox prompt={animation.pathname} url={animation.url} />
             </Grid>
           ))}
