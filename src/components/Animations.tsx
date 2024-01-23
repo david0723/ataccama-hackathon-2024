@@ -52,18 +52,31 @@ const AnimationBox = ({ prompt, url }: { prompt: string; url: string }) => {
   );
 };
 
-const getAnimations = async (reload?: any): Promise<any> => {
-  const cache = localStorage.getItem("animations");
+const safeParseJSON = (str: string | null) => {
+  if (!str) {
+    return null;
+  }
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return null;
+  }
+};
 
+const getCachedAnimations = (): any =>
+  safeParseJSON(localStorage.getItem("animations")) || [];
+
+const getAnimations = async (reload?: any): Promise<any> => {
+  await fetch("/api/animations")
+    .then((res) => res.json())
+    .then((data) => {
+      localStorage.setItem("animations", JSON.stringify(data));
+      if (reload) {
+        reload();
+      }
+    });
+  const cache = localStorage.getItem("animations");
   if (cache) {
-    fetch("/api/animations")
-      .then((res) => res.json())
-      .then((data) => {
-        localStorage.setItem("animations", JSON.stringify(data));
-        if (reload) {
-          reload();
-        }
-      });
     return JSON.parse(cache);
   }
   return [];
@@ -71,6 +84,25 @@ const getAnimations = async (reload?: any): Promise<any> => {
 
 export const Animations = () => {
   const { data, isLoading } = usePromise(() => getAnimations());
+
+  const cache = getCachedAnimations();
+
+  if (cache && cache.length > 0 && !data) {
+    return (
+      <Grid.Container gap={2} justify="center" height="100px">
+        {cache &&
+          Array.isArray(cache) &&
+          cache
+
+            // .sort(() => Math.random() - 0.5)
+            .map((animation: any) => (
+              <Grid xs={12} key={animation.pathname}>
+                <AnimationBox prompt={animation.pathname} url={animation.url} />
+              </Grid>
+            ))}
+      </Grid.Container>
+    );
+  }
 
   if (isLoading) {
     return <Loading />;
