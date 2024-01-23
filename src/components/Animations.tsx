@@ -29,7 +29,6 @@ const AnimationBox = ({ prompt, url }: { prompt: string; url: string }) => {
       }, 0);
     }
   }, [data]);
-  console.log({ data, prompt, url });
 
   if (!isLoading && data && "runAnimation" in data && "html" in data) {
     return (
@@ -52,19 +51,19 @@ const AnimationBox = ({ prompt, url }: { prompt: string; url: string }) => {
   );
 };
 
-const safeParseJSON = (str: string | null) => {
-  if (!str) {
-    return null;
-  }
-  try {
-    return JSON.parse(str);
-  } catch (e) {
-    return null;
-  }
+const getCachedAnimations = (): any => {
+  const safeParseJSON = (str: string | null) => {
+    if (!str) {
+      return null;
+    }
+    try {
+      return JSON.parse(str);
+    } catch (e) {
+      return null;
+    }
+  };
+  return safeParseJSON(localStorage.getItem("animations")) || [];
 };
-
-const getCachedAnimations = (): any =>
-  safeParseJSON(localStorage.getItem("animations")) || [];
 
 const getAnimations = async (reload?: any): Promise<any> => {
   await fetch("/api/animations")
@@ -84,10 +83,9 @@ const getAnimations = async (reload?: any): Promise<any> => {
 
 export const Animations = () => {
   const { data, isLoading } = usePromise(() => getAnimations());
+  const { data: cache } = usePromise(() => getCachedAnimations());
 
-  const cache = getCachedAnimations();
-
-  if (cache && cache.length > 0 && !data) {
+  if (cache && Array.isArray(cache) && cache.length > 0 && !data) {
     return (
       <Grid.Container gap={2} justify="center" height="100px">
         {cache &&
@@ -107,8 +105,6 @@ export const Animations = () => {
   if (isLoading) {
     return <Loading />;
   }
-
-  console.log({ data });
 
   return (
     <Grid.Container gap={2} justify="center" height="100px">
