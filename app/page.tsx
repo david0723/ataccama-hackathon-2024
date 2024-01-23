@@ -139,23 +139,6 @@ function ThirdPartyHtmlComponent({ htmlContent }: { htmlContent: string }) {
   return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
 }
 
-export const useDebounce = function <T>(value: T, delay: number) {
-  const [innerState, setInnerState] = useState<T>(value);
-  const timeoutId = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (timeoutId.current) {
-      clearTimeout(timeoutId.current);
-    }
-
-    const id = setTimeout(() => setInnerState(value), delay);
-
-    timeoutId.current = id;
-  }, [value, delay, timeoutId]);
-
-  return innerState;
-};
-
 export default function Home() {
   const [sceneDescription, setSceneDescription] = useState<string>(placeholder);
   const [isLoading, setIsLoading] = useState<boolean>(false);
